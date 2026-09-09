@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JolpsCrush — nearby, for a fee</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --plum:#2B1330; --plum-2:#3B1B44; --coral:#FF6B6B; --gold:#FFC857;
+    --cream:#FFF6EC; --muted:#9C8AA5; --line:rgba(255,255,255,.12);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--plum);color:var(--cream);font-family:'Inter',sans-serif;}
+  #app{max-width:420px;margin:0 auto;min-height:100vh;background:var(--plum-2);position:relative;display:flex;flex-direction:column;}
+  .screen{padding:28px 22px 32px;flex:1;display:none;flex-direction:column;}
+  .screen.active{display:flex;}
+  .brand{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:28px;color:var(--gold);}
+  .tag{color:var(--muted);font-size:14px;margin-top:2px;}
+  h1{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:22px;margin:18px 0 6px;}
+  p.sub{color:var(--muted);font-size:14px;line-height:1.5;margin:0 0 16px;}
+  label{font-size:13px;color:var(--muted);display:block;margin:12px 0 6px;}
+  input,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--cream);font-size:15px;font-family:'Inter',sans-serif;}
+  input:focus,select:focus{outline:2px solid var(--gold);}
+  .range-row{display:flex;gap:10px;}
+  .range-row input{width:50%;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 18px;border-radius:14px;border:none;font-weight:600;font-size:15px;cursor:pointer;width:100%;margin-top:16px;font-family:'Inter',sans-serif;}
+  .btn-primary{background:var(--coral);color:#2B1330;}
+  .btn-gold{background:var(--gold);color:#2B1330;}
+  .btn-ghost{background:transparent;color:var(--cream);border:1px solid var(--line);}
+  .fine{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5;}
+  .error{color:var(--coral);font-size:13px;margin-top:8px;display:none;}
+  .link{color:var(--gold);text-align:center;margin-top:14px;font-size:13px;cursor:pointer;}
+  .checkbox-row{display:flex;align-items:flex-start;gap:10px;margin-top:14px;}
+  .checkbox-row input{width:auto;margin-top:3px;}
+  .checkbox-row span{font-size:13px;color:var(--muted);line-height:1.4;}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .pill{display:inline-block;background:rgba(255,200,87,.15);color:var(--gold);font-size:12px;padding:4px 10px;border-radius:999px;}
+  .card{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;gap:12px;align-items:center;margin-bottom:12px;cursor:pointer;}
+  .avatar{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--coral),var(--gold));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2';font-weight:700;color:#2B1330;font-size:18px;}
+  .cardinfo{flex:1;}
+  .cardinfo .name{font-weight:600;font-size:15px;}
+  .cardinfo .meta{font-size:12px;color:var(--muted);margin-top:2px;}
+  .dist{font-size:12px;color:var(--gold);font-weight:600;}
+
+  .chat-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .back{cursor:pointer;color:var(--muted);font-size:20px;}
+  .messages{flex:1;display:flex;flex-direction:column;gap:10px;overflow-y:auto;margin-bottom:12px;}
+  .msg{max-width:78%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.4;}
+  .msg.them{background:rgba(255,255,255,.08);align-self:flex-start;}
+  .msg.me{background:var(--coral);color:#2B1330;align-self:flex-end;}
+  .composer{display:flex;gap:8px;}
+  .composer input{flex:1;}
+  .sendbtn{background:var(--gold);border:none;border-radius:12px;padding:0 16px;cursor:pointer;font-weight:600;}
+
+  .overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:10;}
+  .overlay.active{display:flex;}
+  .modal{background:var(--plum-2);border:1px solid var(--line);border-radius:20px 20px 0 0;padding:24px 22px 28px;width:100%;max-width:420px;}
+  .modal h2{font-family:'Baloo 2';font-size:20px;margin:0 0 8px;}
+  .modal p{color:var(--muted);font-size:14px;line-height:1.5;margin:0 0 16px;}
+  .price{font-family:'Baloo 2';font-size:32px;color:var(--gold);margin:6px 0 18px;}
+  .row2{display:flex;gap:10px;}
+  .row2 .btn{margin-top:0;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="screen active" id="screen-auth">
+    <div class="brand">JolpsCrush</div>
+    <div class="tag">nearby, for a fee</div>
+    <h1 id="auth-title">Create your account</h1>
+    <p class="sub">JolpsCrush connects you with people nearby. 500 MWK gets you a full day of texting.</p>
+
+    <div id="signup-fields">
+      <label>Name</label>
+      <input type="text" id="su-name">
+      <label>Date of birth</label>
+      <input type="date" id="su-dob">
+      <label>Gender</label>
+      <select id="su-gender"><option value="F">Woman</option><option value="M">Man</option><option value="O">Other</option></select>
+    </div>
+    <label>Phone number</label>
+    <input type="text" id="su-phone" placeholder="+265...">
+    <label>Password</label>
+    <input type="password" id="su-password">
+
+    <div class="checkbox-row" id="adult-confirm-row">
+      <input type="checkbox" id="confirm-adult">
+      <span>I confirm I am 18 years of age or older.</span>
+    </div>
+
+    <div class="error" id="auth-error"></div>
+    <button class="btn btn-primary" id="auth-submit" onclick="submitSignup()">Continue</button>
+    <div class="link" id="auth-toggle" onclick="toggleAuthMode()">Already have an account? Log in</div>
+  </div>
+
+  <div class="screen" id="screen-prefs">
+    <div class="pill" style="margin-bottom:14px;width:fit-content;">Set your preferences</div>
+    <h1>Who are you looking for?</h1>
+    <p class="sub">We'll use your device location to find people nearby - your browser will ask permission.</p>
+    <label>Age range</label>
+    <div class="range-row">
+      <input type="number" id="pref-age-min" min="18" max="99" value="21">
+      <input type="number" id="pref-age-max" min="18" max="99" value="35">
+    </div>
+    <label>Looking for</label>
+    <select id="pref-intent"><option value="date">Dating</option><option value="hookup">Hookup</option><option value="either">Either</option></select>
+    <label>Max distance: <span id="dist-label">10 km</span></label>
+    <input type="range" id="pref-distance" min="1" max="50" value="10" oninput="document.getElementById('dist-label').textContent=this.value+' km'">
+    <div class="error" id="prefs-error"></div>
+    <button class="btn btn-primary" onclick="savePrefsAndFindNearby()">Find people nearby</button>
+  </div>
+
+  <div class="screen" id="screen-nearby">
+    <div class="topbar">
+      <div class="brand" style="font-size:20px;">JolpsCrush</div>
+      <span id="sub-status" class="pill">Not subscribed</span>
+    </div>
+    <h1 style="margin-top:0;">Nearby matches</h1>
+    <p class="sub" id="nearby-sub"></p>
+    <div id="nearby-list"></div>
+  </div>
+
+  <div class="screen" id="screen-chat">
+    <div class="chat-header">
+      <span class="back" onclick="showScreen('screen-nearby')">←</span>
+      <div class="avatar" id="chat-avatar" style="width:38px;height:38px;font-size:14px;"></div>
+      <div><div style="font-weight:600;font-size:15px;" id="chat-name"></div>
+      <div style="font-size:12px;color:var(--muted);" id="chat-meta"></div></div>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="composer">
+      <input type="text" id="msg-input" placeholder="Type a message...">
+      <button class="sendbtn" onclick="trySend()">Send</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="pay-overlay">
+    <div class="modal">
+      <h2 id="pay-title"></h2>
+      <p id="pay-desc"></p>
+      <div class="price" id="pay-price"></div>
+      <div class="row2">
+        <button class="btn btn-ghost" onclick="closeOverlay('pay-overlay')">Cancel</button>
+        <button class="btn btn-gold" id="pay-confirm-btn">Pay with Airtel Money / Mpamba</button>
+      </div>
+      <div class="fine">You'll be redirected to PayChangu's secure checkout.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = ''; // same-origin
+let authMode = 'signup';
+const state = { token: localStorage.getItem('jc_token') || null, me: null, chatUser: null, pendingSend: null };
+
+function api(path, opts = {}) {
+  const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+  if (state.token) headers['Authorization'] = 'Bearer ' + state.token;
+  return fetch(API + path, Object.assign({}, opts, { headers })).then(async (r) => {
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw Object.assign(new Error(data.error || 'Request failed'), { data, status: r.status });
+    return data;
+  });
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function toggleAuthMode(){
+  authMode = authMode === 'signup' ? 'login' : 'signup';
+  document.getElementById('signup-fields').style.display = authMode === 'signup' ? 'block' : 'none';
+  document.getElementById('adult-confirm-row').style.display = authMode === 'signup' ? 'flex' : 'none';
+  document.getElementById('auth-title').textContent = authMode === 'signup' ? 'Create your account' : 'Log in';
+  document.getElementById('auth-toggle').textContent = authMode === 'signup' ? 'Already have an account? Log in' : "New here? Create an account";
+}
+
+async function submitSignup(){
+  const errEl = document.getElementById('auth-error');
+  errEl.style.display = 'none';
+  const phone = document.getElementById('su-phone').value.trim();
+  const password = document.getElementById('su-password').value;
+  try {
+    let data;
+    if (authMode === 'signup') {
+      const name = document.getElementById('su-name').value.trim();
+      const dob = document.getElementById('su-dob').value;
+      const gender = document.getElementById('su-gender').value;
+      const confirmed = document.getElementById('confirm-adult').checked;
+      if (!confirmed) throw new Error('Please confirm you are 18 or older');
+      data = await api('/api/auth/signup', { method: 'POST', body: JSON.stringify({ name, dob, gender, phone, password }) });
+    } else {
+      data = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ phone, password }) });
+    }
+    state.token = data.token;
+    state.me = data.user;
+    localStorage.setItem('jc_token', data.token);
+    showScreen('screen-prefs');
+  } catch (e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+  }
+}
+
+function getLocation() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) return reject(new Error('Location not supported by this browser'));
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => reject(new Error('Location permission denied - JolpsCrush needs it to find people nearby'))
+    );
+  });
+}
+
+async function savePrefsAndFindNearby(){
+  const errEl = document.getElementById('prefs-error');
+  errEl.style.display = 'none';
+  try {
+    const ageMin = parseInt(document.getElementById('pref-age-min').value, 10);
+    const ageMax = parseInt(document.getElementById('pref-age-max').value, 10);
+    const distanceKm = parseInt(document.getElementById('pref-distance').value, 10);
+    const intent = document.getElementById('pref-intent').value;
+    await api('/api/users/me/preferences', { method: 'PUT', body: JSON.stringify({ ageMin, ageMax, distanceKm, intent }) });
+
+    const loc = await getLocation();
+    await api('/api/users/me/location', { method: 'PUT', body: JSON.stringify(loc) });
+
+    showScreen('screen-nearby');
+    loadNearby();
+  } catch (e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+  }
+}
+
+async function loadNearby(){
+  try {
+    const data = await api('/api/users/nearby');
+    const list = data.results;
+    document.getElementById('nearby-sub').textContent = `${list.length} people match your filters.`;
+    const container = document.getElementById('nearby-list');
+    container.innerHTML = '';
+    if (list.length === 0) {
+      container.innerHTML = '<p class="sub">Nobody matches yet - try widening your distance or age filter.</p>';
+      return;
+    }
+    list.forEach((p) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.onclick = () => openChat(p);
+      card.innerHTML = `<div class="avatar">${p.name[0]}</div>
+        <div class="cardinfo"><div class="name">${p.name}, ${p.age}</div><div class="meta">${p.gender === 'F' ? 'Woman' : p.gender === 'M' ? 'Man' : 'Other'}</div></div>
+        <div class="dist">${p.distanceKm} km</div>`;
+      container.appendChild(card);
+    });
+  } catch (e) {
+    document.getElementById('nearby-sub').textContent = e.message;
+  }
+}
+
+async function openChat(person){
+  state.chatUser = person;
+  document.getElementById('chat-avatar').textContent = person.name[0];
+  document.getElementById('chat-name').textContent = person.name;
+  document.getElementById('chat-meta').textContent = `${person.age} - ${person.distanceKm} km away`;
+  showScreen('screen-chat');
+  const data = await api('/api/messages/' + person.id);
+  renderMessages(data.messages);
+}
+
+function renderMessages(messages){
+  const el = document.getElementById('messages');
+  el.innerHTML = '';
+  messages.forEach((m) => {
+    const div = document.createElement('div');
+    div.className = 'msg ' + (m.from === state.me?.id ? 'me' : 'them');
+    div.textContent = m.text;
+    el.appendChild(div);
+  });
+  el.scrollTop = el.scrollHeight;
+}
+
+const PHONE_RE = /(\+?\d[\d\s\-]{7,}\d)/;
+
+async function trySend(txRef){
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  try {
+    await api('/api/messages/' + state.chatUser.id, { method: 'POST', body: JSON.stringify({ text, txRef }) });
+    input.value = '';
+    const data = await api('/api/messages/' + state.chatUser.id);
+    renderMessages(data.messages);
+  } catch (e) {
+    if (e.data?.error === 'subscription_required') {
+      openPayModal('subscription', text);
+    } else if (e.data?.error === 'phone_share_payment_required') {
+      openPayModal('phone_message', text);
+    } else {
+      alert(e.message);
+    }
+  }
+}
+
+function openPayModal(type, pendingText){
+  state.pendingSend = pendingText;
+  const price = type === 'subscription' ? 500 : 500;
+  document.getElementById('pay-title').textContent = type === 'subscription' ? 'Subscribe to text' : 'That looks like a phone number';
+  document.getElementById('pay-desc').textContent = type === 'subscription'
+    ? "You need today's pass before you can message anyone."
+    : 'Sharing contact info takes the conversation off JolpsCrush.';
+  document.getElementById('pay-price').textContent = price + ' MWK';
+  document.getElementById('pay-confirm-btn').onclick = () => startPayment(type);
+  document.getElementById('pay-overlay').classList.add('active');
+}
+
+function closeOverlay(id){ document.getElementById(id).classList.remove('active'); }
+
+async function startPayment(type){
+  try {
+    const data = await api('/api/payments/initiate', { method: 'POST', body: JSON.stringify({ type }) });
+    // Stash what we were trying to do so we can resume after checkout redirect.
+    localStorage.setItem('jc_pending_txref', data.txRef);
+    localStorage.setItem('jc_pending_text', state.pendingSend || '');
+    localStorage.setItem('jc_pending_chat_with', state.chatUser?.id || '');
+    if (data.checkoutUrl) {
+      window.location.href = data.checkoutUrl;
+    } else {
+      alert('Payment provider did not return a checkout link. Check your PAYCHANGU_SECRET_KEY in .env.');
+    }
+  } catch (e) {
+    alert('Could not start payment: ' + e.message);
+  }
+}
+
+// If we're bounced back from payment-complete.html with a confirmed txRef, resume the send.
+window.addEventListener('DOMContentLoaded', async () => {
+  if (!state.token) return;
+  const hash = new URLSearchParams(window.location.hash.slice(1));
+  const confirmedTxRef = hash.get('paid');
+  if (confirmedTxRef) {
+    const chatWith = localStorage.getItem('jc_pending_chat_with');
+    const text = localStorage.getItem('jc_pending_text');
+    if (chatWith && text) {
+      state.chatUser = { id: chatWith, name: '...' };
+      document.getElementById('msg-input').value = text;
+      showScreen('screen-chat');
+      await trySend(confirmedTxRef);
+    }
+  }
+});
+</script>
+</body>
+</html>

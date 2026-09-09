@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Confirming payment...</title>
+<style>
+  body{font-family:sans-serif;background:#2B1330;color:#FFF6EC;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}
+  .box{text-align:center;}
+</style>
+</head>
+<body>
+<div class="box">
+  <p id="status">Confirming your payment...</p>
+</div>
+<script>
+async function poll(){
+  const params = new URLSearchParams(window.location.search);
+  const txRef = params.get('txRef');
+  const token = localStorage.getItem('jc_token');
+  const statusEl = document.getElementById('status');
+  if (!txRef || !token) { statusEl.textContent = 'Missing payment reference.'; return; }
+
+  for (let i = 0; i < 15; i++) {
+    try {
+      const res = await fetch('/api/payments/status/' + encodeURIComponent(txRef), {
+        headers: { Authorization: 'Bearer ' + token },
+      });
+      const data = await res.json();
+      if (data.status === 'completed') {
+        statusEl.textContent = 'Payment confirmed! Returning you to JolpsCrush...';
+        setTimeout(() => { window.location.href = '/#paid=' + encodeURIComponent(txRef); }, 800);
+        return;
+      }
+      if (data.status === 'failed') {
+        statusEl.textContent = 'Payment failed or was cancelled.';
+        return;
+      }
+    } catch (e) {
+      // keep polling
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  statusEl.textContent = "Still waiting on confirmation - if you completed payment, check back in the app shortly.";
+}
+poll();
+</script>
+</body>
+</html>

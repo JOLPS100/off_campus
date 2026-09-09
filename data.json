@@ -1,0 +1,63 @@
+{
+  "users": [
+    {
+      "id": "u_1788979791829_3jcwqh",
+      "name": "jonathan snovar",
+      "dob": "2000-04-12",
+      "age": 26,
+      "gender": "M",
+      "phone": "+265986498969",
+      "passwordHash": "$2a$10$ZGkAyoJeae27RdWVRgmRdOrrv3SogbiXXy/VpS8ifws0.Q1bSpbJi",
+      "lat": null,
+      "lng": null,
+      "prefs": {
+        "ageMin": 21,
+        "ageMax": 35,
+        "distanceKm": 42,
+        "intent": "hookup"
+      },
+      "subscriptionExpiresAt": null,
+      "createdAt": "2026-09-09T18:49:51.829Z"
+    },
+    {
+      "id": "u_1788983144007_dya1w5",
+      "name": "jolps",
+      "dob": "2000-12-04",
+      "age": 25,
+      "gender": "F",
+      "phone": "+265878908",
+      "passwordHash": "$2a$10$R.yLzDfdYpSlIE5bJEglwekXdCaRBmvp0ABTM7XeDwYjT/gKKYfpq",
+      "lat": null,
+      "lng": null,
+      "prefs": {
+        "ageMin": 18,
+        "ageMax": 99,
+        "distanceKm": 25,
+        "intent": "either"
+      },
+      "subscriptionExpiresAt": null,
+      "createdAt": "2026-09-09T19:45:44.007Z"
+    },
+    {
+      "id": "u_1788983622781_73b886",
+      "name": "jolps100",
+      "dob": "2000-12-04",
+      "age": 25,
+      "gender": "M",
+      "phone": "+26598969",
+      "passwordHash": "$2a$10$H5z/wodKt5AHHKIL0/brOeTu3LR.iiXfn/aiLHQyuA9oFGQ4knxVO",
+      "lat": null,
+      "lng": null,
+      "prefs": {
+        "ageMin": 18,
+        "ageMax": 99,
+        "distanceKm": 25,
+        "intent": "either"
+      },
+      "subscriptionExpiresAt": null,
+      "createdAt": "2026-09-09T19:53:42.781Z"
+    }
+  ],
+  "transactions": [],
+  "conversations": {}
+}
