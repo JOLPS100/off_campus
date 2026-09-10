@@ -19,6 +19,9 @@ app.use('/api/payments', paymentRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/',(req, res)=>{
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));});
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`JolpsCrush server running on http://localhost:${PORT}`);
