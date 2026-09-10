@@ -20,7 +20,7 @@ app.use('/api/payments', paymentRoutes);
 app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`JolpsCrush server running on http://localhost:${PORT}`);
   if (!process.env.JWT_SECRET || process.env.JWT_SECRET.startsWith('change_this')) {
     console.warn('WARNING: JWT_SECRET is not set to a real secret - do not use this in production.');
